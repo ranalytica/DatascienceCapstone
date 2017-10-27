@@ -1,0 +1,199 @@
+---
+title: "NLP Cheatsheet"
+author: "Thiloshon Nagarajah"
+date: "September 24, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Conceptual process and framework
+
+first step is to import these texts into one's favorite computing environment
+
+
+second step
+is tidying up the texts, including preprocessing the texts to obtain a convenient representation
+for later analysis. This step might involve text reformatting (e.g., whitespace removal),stopword removal, or stemming procedures. 
+
+Third, the analyst must be able to transform
+the preprocessed texts into structured formats to be actually computed with. For classical
+text mining tasks, this normally implies the creation of a so-called term-document matrix,
+probably the most common format to represent texts for computation. 
+
+Now the analyst can
+work and compute on texts with standard techniques from statistics and data mining, like
+clustering or classication methods.
+
+
+A text mining framework must oer functionality for managing text
+documents, should abstract the process of document manipulation and ease the usage of
+heterogeneous text formats. Thus there is a need for a conceptual entity similar to a database
+holding and managing text documents in a generic way: we call this entity a text document
+collection or corpus.
+
+the framework must be able to alleviate metadata usage in a convenient
+way, both on a document level (e.g., short summaries or descriptions of selected documents)
+and on a collection level (e.g., collection-wide classication tags).
+
+the framework must provide tools and
+algorithms to eciently work with the documents. That means the framework has to have
+functionality to perform common tasks, like whitespace removal, stemming or stopword deletion.
+We denote such functions operating on text document collections as transformations.
+
+Text mining typically involves doing computations on texts to gain interesting information.
+The most common approach is to create a so-called term-document matrix holding frequences
+of distinct terms for each document. Another approach is to compute directly on character
+sequences as is done by string kernel methods.Thus the framework must allow export mechanisms for
+term-document matrices and provide interfaces to access the document corpora as
+plain character sequences.
+
+
+## Data structures and algorithms
+
+Text document collections (Corpus): a collection of text documents
+and can be interpreted as a database for texts. Its elements are TextDocuments holding the
+actual text corpora and local metadata. The text document collection has two slots for storing
+global metadata and one slot for database support.
+
+We can distinguish two types of metadata, namely Document Metadata and Collection Meta-
+data. Document metadata (DMetaData) is for information specic to text documents but
+with an own entity, like classication results (it holds both the classications for each documents
+but in addition global information like the number of classication levels). Collection
+metadata (CMetaData) is for global metadata on the collection level not necessarily related
+to single text documents, like the creation date of the collection (which is independent from
+the documents within the collection).
+
+Text documents: The next core class is a text document (TextDocument), the basic unit managed by a text
+document collection. It is an abstract class, i.e., we must derive specic document classes to
+obtain document types we actually use in daily text mining. Basic slots are Author holding
+the text creators, DateTimeStamp for the creation date, Description for short explanations
+or comments, ID for a unique identication string, Origin denoting the document source (like
+the news agency or publisher), Heading for the document title, Language for the document
+language, and LocalMetaData for any additional metadata.
+
+Text repositories:can be used to keep
+track of text document collections.The class TextRepository is conceptualized for storing
+representations of the same text document collection. This allows to backtrack transformations
+on text documents and access the original input data if desired or necessary. The
+dynamic slot RepoMetaData can help to save the history of a text document collection, e.g.,
+all transformations with a time stamp in form of tag-value pair metadata.
+
+Term-document matrices: probably the most common way of representing texts for further computation. It can
+be exported from a Corpus and is used as a bag-of-words mechanism which means that the
+order of tokens is irrelevant. This approach results in a matrix with document IDs as rows
+and terms as columns. The matrix elements are term frequencies. 
+Instead of using the term frequency (weightTf) directly, one can use dierent weightings. The
+slot Weighting of a TermDocMatrix provides this facility by calling a weighting function on
+the matrix elements. Available weighting schemes include the binary frequency (weightBin)
+method which eliminates multiple entries, or the inverse document frequency (weightTfIdf)
+weighting giving more importance to discriminative compared to irrelevant terms.
+
+Transformations operate on each text document in a text document collection by applying a
+function to them. Thus we obtain another representation of the whole text document collection.
+Filter operations instead allow to identify subsets of the text document collection. Such
+a subset is dened by a function applied to each text document resulting in a Boolean answer.
+Hence formally the lter function is just a predicate function. This way we can easily identify
+documents with common characteristics.
+
+
+Transformations shipped with tm:
+asPlain() Converts the document to a plain text document
+loadDoc() Triggers load on demand
+removeCitation() Removes citations from e-mails
+removeMultipart() Removes non-text from multipart e-mails
+removeNumbers() Removes numbers
+removePunctuation() Removes punctuation marks
+removeSignature() Removes signatures from e-mails
+removeWords() Removes stopwords
+replaceWords() Replaces a set of words with a given phrase
+stemDoc() Stems the text document
+stripWhitespace() Removes extra whitespace
+tmTolower() Conversion to lower case letters
+
+
+## Preprocessing
+
+Data import
+Since the documents are in XML format and we prefer to get rid of the XML tree and use
+the plain text instead we transform our collection with the predened generic asPlain():
+R> tmMap(Reuters, asPlain)
+
+We then extract two subsets of the full Reuters-21578 data set by ltering out those with topics
+acq and crude. Since the Topics are stored in the LocalMetaData slot by
+readReut21578XML() the ltering can be easily accomplished e.g., via
+R> tmFilter(crude, "Topics == 'crude'")
+
+Stemming
+Porter stemming algorithm
+
+Whitespace elimination and lower case conversion
+
+Stopword removal
+
+Synonyms
+
+Part of speech tagging
+
+
+## Applications
+
+1. Count-based evaluation and associations of terms
+One of the simplest analysis methods in text mining is based on count-based evaluation. This
+means that those terms with the highest occurrence frequencies in a text are rated important.
+Another approach available in common text mining tools is nding associations for a given
+term, which is a further form of count-based evaluation methods.
+
+
+2. Simple text clustering
+
+Hierarchical clustering
+Common similarity measures in
+text mining are Metric Distances, Cosine Measure, Pearson Correlation and Extended Jaccard
+Similarity
+
+k-means clustering
+
+
+
+3. Simple text classication
+In contrast to clustering, where groups are unknown at the beginning, classication tries to
+put specic documents into groups known in advance
+
+k-nearest neighbor classication
+
+Support vector machine classication
+
+
+4. Text clustering with string kernels
+string kernels, which are methods dealing with text directly, and not
+anymore with an intermediate representation like term-document matrices.
+
+
+
+
+IMPLEMENTATIONS
+
+1) distributions of word frequencies
+
+Zipf's law states that given some corpus of natural language utterances, the frequency of any word is inversely proportional to its rank in the frequency table. Thus the most frequent word will occur approximately twice as often as the second most frequent word, three times as often as the third most frequent word, etc.: the rank-frequency distribution is an inverse relation. For example, in the Brown Corpus of American English text, the word "the" is the most frequently occurring word, and by itself accounts for nearly 7% of all word occurrences (69,971 out of slightly over 1 million). True to Zipf's Law, the second-place word "of" accounts for slightly over 3.5% of words (36,411 occurrences), followed by "and" (28,852). Only 135 vocabulary items are needed to account for half the Brown Corpus.[4]
+
+The same relationship occurs in many other rankings unrelated to language, such as the population ranks of cities in various countries, corporation sizes, income rankings, ranks of number of people watching the same TV channel,[5] and so on. The appearance of the distribution in rankings of cities by population was first noticed by Felix Auerbach in 1913.
+
+http://yulijia.net/en/howto/r-language/2011/08/06/how-to-calculate-word-frequencies-with-r.html
+
+https://stackoverflow.com/questions/18101047/list-of-word-frequencies-using-r
+
+
+
+Counting tokens and types
+
+frequency list : rank/frequency profiles and as frequency spectra
+
+
+
+
+
+
