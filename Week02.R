@@ -46,6 +46,8 @@ masterTable_News <- sort(table(masterVector_News), decreasing = T)
 # ----
 
 require("tm")
+library(tm)
+library(RWeka)
 removeWords(masterString_Twitter,"RT")
 
 barplot(masterTable_News[1:20], names.arg = names(masterTable_News[1:20]))
@@ -64,7 +66,8 @@ lapply(1:length(myl), function(n) setdiff(myl[[n]], unlist(myl[-n])))
 
 #-----
 
-corp <- Corpus(VectorSource(US_Twitter))
+US_Twitter_Sample <- sample(US_Twitter, 100000)
+corp <- Corpus(VectorSource(US_Twitter_Sample))
 
 corpus.ng = tm_map(corp,removePunctuation)
 corpus.ng = tm_map(corpus.ng,removeNumbers)
