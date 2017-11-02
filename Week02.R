@@ -1,6 +1,6 @@
-con1 <- file("Data/en_US/en_US.twitter.txt", "r")
-con2 <- file("Data/en_US/en_US.news.txt", "r") 
-con3 <- file("Data/en_US/en_US.blogs.txt", "r") 
+con1 <- file("SwiftKey/en_US/en_US.twitter.txt", "r")
+con2 <- file("SwiftKey/en_US/en_US.news.txt", "r") 
+con3 <- file("SwiftKey/en_US/en_US.blogs.txt", "r") 
 
 US_Twitter <- readLines(con1)
 US_Twitter.cleaned <- gsub('[[:punct:]]', '', US_Twitter)
@@ -66,13 +66,13 @@ lapply(1:length(myl), function(n) setdiff(myl[[n]], unlist(myl[-n])))
 
 #-----
 
-US_Twitter_Sample <- sample(US_Twitter, 100000)
+US_Twitter_Sample <- sample(US_Twitter, 1000)
 corp <- Corpus(VectorSource(US_Twitter_Sample))
 
 corpus.ng = tm_map(corp,removePunctuation)
 corpus.ng = tm_map(corpus.ng,removeNumbers)
 
-BigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 2, max = 2))
+BigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 1, max = 1))
 tdm.bigram = TermDocumentMatrix(corpus.ng,
                                 control = list(tokenize = BigramTokenizer))
 
@@ -81,4 +81,20 @@ freq.df = data.frame(word=names(freq), freq=freq)
 head(freq.df, 20)
 
 
+#----
+tdm <- TermDocumentMatrix(corpus.ng, control=list(tokenize =  RWeka::WordTokenizer, 
+                                              wordLengths = c(1, Inf)))
+head(sort(slam::row_sums(tdm), decreasing = TRUE), 12)
 
+t.twitter <- as.data.frame(head(sort(slam::row_sums(tdm), decreasing = TRUE), 12)) 
+t2.twitter <- data.frame("y" = t.twitter[,1], "x" = row.names(t.twitter))
+
+p<-ggplot(data=t2.twitter, aes(x=x, y=y)) +
+    geom_bar(stat="identity") + theme(axis.text.x = element_text(angle = 60, hjust = 1))
+p
+
+library(ggplot2)
+# Basic barplot
+p<-ggplot(data=df, aes(x=dose, y=len)) +
+    geom_bar(stat="identity")
+p

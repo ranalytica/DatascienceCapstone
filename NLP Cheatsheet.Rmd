@@ -178,9 +178,17 @@ IMPLEMENTATIONS
 
 1) distributions of word frequencies
 
-Zipf's law states that given some corpus of natural language utterances, the frequency of any word is inversely proportional to its rank in the frequency table. Thus the most frequent word will occur approximately twice as often as the second most frequent word, three times as often as the third most frequent word, etc.: the rank-frequency distribution is an inverse relation. For example, in the Brown Corpus of American English text, the word "the" is the most frequently occurring word, and by itself accounts for nearly 7% of all word occurrences (69,971 out of slightly over 1 million). True to Zipf's Law, the second-place word "of" accounts for slightly over 3.5% of words (36,411 occurrences), followed by "and" (28,852). Only 135 vocabulary items are needed to account for half the Brown Corpus.[4]
+Zipf's law states that given some corpus of natural language utterances, the frequency of any word is inversely
+proportional to its rank in the frequency table. Thus the most frequent word will occur approximately twice as
+often as the second most frequent word, three times as often as the third most frequent word, etc.: the rank-frequency
+ distribution is an inverse relation. For example, in the Brown Corpus of American English text, the word "the" is the
+ most frequently occurring word, and by itself accounts for nearly 7% of all word occurrences (69,971 out of slightly
+ over 1 million). True to Zipf's Law, the second-place word "of" accounts for slightly over 3.5% of words (36,411
+ occurrences), followed by "and" (28,852). Only 135 vocabulary items are needed to account for half the Brown Corpus.[4]
 
-The same relationship occurs in many other rankings unrelated to language, such as the population ranks of cities in various countries, corporation sizes, income rankings, ranks of number of people watching the same TV channel,[5] and so on. The appearance of the distribution in rankings of cities by population was first noticed by Felix Auerbach in 1913.
+The same relationship occurs in many other rankings unrelated to language, such as the population ranks of cities in
+various countries, corporation sizes, income rankings, ranks of number of people watching the same TV channel,[5]
+and so on. The appearance of the distribution in rankings of cities by population was first noticed by Felix Auerbach in 1913.
 
 http://yulijia.net/en/howto/r-language/2011/08/06/how-to-calculate-word-frequencies-with-r.html
 
@@ -191,9 +199,3 @@ https://stackoverflow.com/questions/18101047/list-of-word-frequencies-using-r
 Counting tokens and types
 
 frequency list : rank/frequency profiles and as frequency spectra
-
-
-
-
-
-
