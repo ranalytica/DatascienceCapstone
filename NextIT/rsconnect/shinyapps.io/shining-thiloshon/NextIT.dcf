@@ -1,0 +1,12 @@
+name: NextIT
+title: NextIT
+username:
+account: shining-thiloshon
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 232166
+bundleId: 1060141
+url: https://shining-thiloshon.shinyapps.io/NextIT/
+when: 1509905439.26827
+asMultiple: FALSE
+asStatic: FALSE
