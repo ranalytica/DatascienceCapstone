@@ -22,7 +22,7 @@ Algorithm and Procedure 01
 The overall algorithm is as follows:
 
 1. Sampling 20% of data for train and rest for test and validation 
-2. Getting and cleaning data: Removing punctuations, twitter words, numbers,URLs and profanity words.
+2. Getting and cleaning data: Removing punctuations, twitter words, numbers, URLs and profanity words.
 3. Tokenizing, Stemming and creating Document Frequency Matrix for 1-gram, 2-grams and 3-grams.
 4. Generating probabilities and applying Kneser-Ney Smoothing
 
