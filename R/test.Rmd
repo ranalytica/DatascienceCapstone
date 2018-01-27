@@ -1,0 +1,187 @@
+---
+title: "Week 02 Milestone Report of Capstone Project"
+author: "Thiloshon Nagarajah"
+date: "October 31, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE,cache=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Synopsis
+
+The task of capstone project is to understand and build predictive text models that will help users in typing sentences faster in keypads. A typical example is the SwiftKey Keyboard in mobile devices. The project will start with the basics, analyzing a large corpus of text documents to discover the structure in the data and how words are put together. It will cover cleaning and analyzing text data, then building and sampling from a predictive text model. The libraries and frameworks to use were analysed and tm for text mining and RWeka for Tokenizing and creating n-grams were choosen. The tokenizer function in RWeka gave unexpected results for tm 0.7 version. So tm was downversioned to 0.6 to continue the project. For profanity filtering Carnegie Mellon University Luis von Ahn’s Research Group's bad word collection was used.
+
+## Dataset
+The dataset i am using is provided by the Coursera Course and is created by folks at Swiftkey. The dataset is in 4 languages,
+
+* English
+* German
+* Finnish
+* Russian
+
+and each language contains text documents from different sources,
+
+ *  Twitter Tweets
+ *  Blogs
+ *  News
+
+Lets try to quantify the raw English dataset.
+
+```{r one, echo=FALSE }
+suppressPackageStartupMessages(library(knitr)) 
+suppressPackageStartupMessages(library(tm)) 
+con1 <- file("SwiftKey/en_US/en_US.twitter.txt", "r")
+con2 <- file("SwiftKey/en_US/en_US.news.txt", "r")
+con3 <- file("SwiftKey/en_US/en_US.blogs.txt", "r")
+
+US_Twitter <- suppressWarnings(readLines(con1))
+US_Blogs <- suppressWarnings(readLines(con2))
+US_News <- suppressWarnings(readLines(con3))
+
+masterString_Twitter <- paste(US_Twitter, collapse = ' ', sep = " ")
+masterVector_Twitter <- strsplit(masterString_Twitter, " ")[1]
+
+masterString_Blogs <- paste(US_Blogs, collapse = ' ', sep = " ")
+masterVector_Blogs <- strsplit(masterString_Blogs, " ")[1]
+
+masterString_News <- paste(US_News, collapse = ' ', sep = " ")
+masterVector_News <- strsplit(masterString_News, " ")[1]
+
+
+rawStatistics <-
+data.frame(
+"TextDocument" = c("Twitter", "News", "Blogs"),
+"Lines" = c(length(US_Twitter), length(US_News), length(US_Blogs)),
+"Words" = c(length(masterVector_Twitter[[1]]), length(masterVector_News[[1]]), length(masterVector_Blogs[[1]])),
+"MaxWords" = c(max(lengths(strsplit(US_Twitter, " "))), max(lengths(strsplit(US_News, " "))), max(lengths(strsplit(US_Blogs, " ")))),
+"AvgWords" = c(mean(lengths(strsplit(US_Twitter, " "))), mean(lengths(strsplit(US_News, " "))), mean(lengths(strsplit(US_Blogs, " ")))),
+"Characters" = c(nchar(masterString_Twitter), nchar(masterString_News), nchar(masterString_Blogs)),
+"MaxChars" = c(max(nchar(US_Twitter)), max(nchar(US_News)), max(nchar(US_Blogs))),
+"AvgChars" = c(mean(nchar(US_Twitter)), mean(nchar(US_News)), mean(nchar(US_Blogs)))
+)
+kable(rawStatistics, caption = "RAW Data")
+```
+
+## Loading Data
+
+Data was downloaded from the Coursera Course Page by using the url <https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip>. The dataset was loaded into R by using connections and readline function.
+
+```{r eval=FALSE}
+con1 <- file("SwiftKey/en_US/en_US.twitter.txt", "r")
+US_Twitter <- readLines(con1)
+```
+
+The main concern in doing text mining is the resource. Text mining requires alot of computational power and memory in particular. Even though the data set i have is couple of millions of records long, I could only load around 7000 records of data in memory in one go. So i have decided to random subsample the data and get a fraction of data to continue the project. 
+
+```{r}
+US_Twitter_Sample <- sample(US_Twitter, 7000)
+US_News_Sample <- sample(US_Twitter, 7000)
+US_Blogs_Sample <- sample(US_Twitter, 7000)
+```
+
+Now the statistics are as follows,
+```{r two, echo=FALSE}
+US_Twitter <- US_Twitter_Sample
+US_News <- US_News_Sample
+US_Blogs <- US_Blogs_Sample
+
+masterString_Twitter <- paste(US_Twitter, collapse = ' ', sep = " ")
+masterVector_Twitter <- strsplit(masterString_Twitter, " ")[1]
+
+masterString_Blogs <- paste(US_Blogs, collapse = ' ', sep = " ")
+masterVector_Blogs <- strsplit(masterString_Blogs, " ")[1]
+
+masterString_News <- paste(US_News, collapse = ' ', sep = " ")
+masterVector_News <- strsplit(masterString_News, " ")[1]
+
+rawStatistics <-
+data.frame(
+"TextDocument" = c("Twitter", "News", "Blogs"),
+"Lines" = c(length(US_Twitter), length(US_News), length(US_Blogs)),
+"Words" = c(length(masterVector_Twitter[[1]]), length(masterVector_News[[1]]), length(masterVector_Blogs[[1]])),
+"MaxWords" = c(max(lengths(strsplit(US_Twitter, " "))), max(lengths(strsplit(US_News, " "))), max(lengths(strsplit(US_Blogs, " ")))),
+"AvgWords" = c(mean(lengths(strsplit(US_Twitter, " "))), mean(lengths(strsplit(US_News, " "))), mean(lengths(strsplit(US_Blogs, " ")))),
+"Characters" = c(nchar(masterString_Twitter), nchar(masterString_News), nchar(masterString_Blogs)),
+"MaxChars" = c(max(nchar(US_Twitter)), max(nchar(US_News)), max(nchar(US_Blogs))),
+"AvgChars" = c(mean(nchar(US_Twitter)), mean(nchar(US_News)), mean(nchar(US_Blogs)))
+)
+kable(rawStatistics, caption = "Sample Data")
+```
+
+And finally the text documents were converted to corpus objects.
+
+```{r}
+twitter <- Corpus(VectorSource(US_Twitter))
+```
+
+## Preprocessing
+
+There were few concerns to be addressed in the dataset we gathered. The following few steps show how these concerns were addressed.
+
+```{r}
+# the puncuations and numbers in the texts were removed as there is no need to predict punctations or numbers
+twitter.cleaned <- tm_map(twitter,removePunctuation)
+twitter.cleaned <- tm_map(twitter.cleaned,removeNumbers)
+
+# Profanity filtering was done
+twitter.cleaned <- tm_map(twitter.cleaned, removeWords, readLines("bad-words.txt"))
+```
+
+```{r echo=FALSE}
+news <- Corpus(VectorSource(US_News))
+blogs <- Corpus(VectorSource(US_Blogs))
+
+news.cleaned <- tm_map(news,removePunctuation)
+news.cleaned <- tm_map(news.cleaned,removeNumbers)
+news.cleaned <- tm_map(news.cleaned, removeWords, readLines("bad-words.txt"))
+
+blogs.cleaned <- tm_map(blogs,removePunctuation)
+blogs.cleaned <- tm_map(blogs.cleaned,removeNumbers)
+blogs.cleaned <- tm_map(blogs.cleaned, removeWords, readLines("bad-words.txt"))
+```
+
+After cleaning and profanity filtering, the dataset is as follows,
+
+```{r three, echo=FALSE}
+US_Twitter <- data.frame(text=unlist(sapply(twitter.cleaned, `[`, "content")), 
+    stringsAsFactors=F)[,1]
+US_News <- data.frame(text=unlist(sapply(news.cleaned, `[`, "content")), 
+    stringsAsFactors=F)[,1]
+US_Blogs <- data.frame(text=unlist(sapply(blogs.cleaned, `[`, "content")), 
+    stringsAsFactors=F)[,1]
+
+masterString_Twitter <- paste(US_Twitter, collapse = ' ', sep = " ")
+masterVector_Twitter <- strsplit(masterString_Twitter, " ")[1]
+
+masterString_Blogs <- paste(US_Blogs, collapse = ' ', sep = " ")
+masterVector_Blogs <- strsplit(masterString_Blogs, " ")[1]
+
+masterString_News <- paste(US_News, collapse = ' ', sep = " ")
+masterVector_News <- strsplit(masterString_News, " ")[1]
+
+rawStatistics <-
+data.frame(
+"TextDocument" = c("Twitter", "News", "Blogs"),
+"Lines" = c(length(US_Twitter), length(US_News), length(US_Blogs)),
+"Words" = c(length(masterVector_Twitter[[1]]), length(masterVector_News[[1]]), length(masterVector_Blogs[[1]])),
+"MaxWords" = c(max(lengths(strsplit(US_Twitter, " "))), max(lengths(strsplit(US_News, " "))), max(lengths(strsplit(US_Blogs, " ")))),
+"AvgWords" = c(mean(lengths(strsplit(US_Twitter, " "))), mean(lengths(strsplit(US_News, " "))), mean(lengths(strsplit(US_Blogs, " ")))),
+"Characters" = c(nchar(masterString_Twitter), nchar(masterString_News), nchar(masterString_Blogs)),
+"MaxChars" = c(max(nchar(US_Twitter)), max(nchar(US_News)), max(nchar(US_Blogs))),
+"AvgChars" = c(mean(nchar(US_Twitter)), mean(nchar(US_News)), mean(nchar(US_Blogs)))
+)
+kable(rawStatistics, caption = "Cleaned Data")
+```
+
+
+## Tokenization and N-Gram Modelling
+
+
+
+
+
+
+
+

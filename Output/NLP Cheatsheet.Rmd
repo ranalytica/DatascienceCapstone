@@ -9,19 +9,8 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Conceptual Process
-
-1) First step is to import these texts into one's favorite computing environment.
-
-
-2) Second step is tidying up the texts, including preprocessing the texts to obtain a convenient representation for later analysis. 
-This step might involve text reformatting (e.g., whitespace removal),stopword removal, or stemming procedures. 
-
-3) Third, the analyst must be able to transform the preprocessed texts into structured formats to be actually computed with. 
-For classical text mining tasks, this normally implies the creation of a so-called term-document matrix, probably the most common format to represent texts for computation. 
-
-4) Now the analyst can work and compute on texts with standard techniques from statistics and data mining, like clustering or classification methods.
-
+## Drum Roll
+This is a brief cheat sheet for Natural Language process pipeline. This is by no means, elaborate, just listing the concepts I learned from the Coursera Capstone. The content is from the Capstone project of Data Science Coursera specialization, so the credit goes to the awesome instructors and relevant sources.
 
 ## Frameworks
 
@@ -30,7 +19,7 @@ heterogeneous text formats. Thus there is a need for a conceptual entity similar
 collection or corpus.
 
 The framework must be able to alleviate metadata usage in a convenient way, both on a document level (e.g., short summaries or descriptions of selected documents)
-and on a collection level (e.g., collection-wide classication tags).
+and on a collection level (e.g., collection-wide classification tags).
 
 The framework must provide tools and algorithms to effciently work with the documents. That means the framework has to have
 functionality to perform common tasks, like whitespace removal, stemming or stopword deletion.
@@ -50,15 +39,18 @@ global metadata and one slot for database support.
 
 We can distinguish two types of metadata, namely Document Metadata and Collection Meta-
 data. 
+
    1) Document metadata (DMetaData) is for information specific to text documents but
 with an own entity, like classification results (it holds both the classifications for each documents
 but in addition global information like the number of classification levels). 
+
    2) Collection metadata (CMetaData) is for global metadata on the collection level not necessarily related
 to single text documents, like the creation date of the collection (which is independent from
 the documents within the collection).
 
 Text documents: The next core class is a text document (TextDocument), the basic unit managed by a text document collection. It is an abstract class, i.e., we must derive specific document classes to
 obtain document types we actually use in daily text mining. Basic slots are,
+
 1) Author holding the text creators, 
 2) DateTimeStamp for the creation date, 
 3) Description for short explanations or comments, 
@@ -78,7 +70,18 @@ Instead of using the term frequency (weightTf) directly, one can use different w
 the matrix elements. Available weighting schemes include the binary frequency (weightBin) method which eliminates multiple entries, or the inverse document frequency (weightTfIdf)
 weighting giving more importance to discriminative compared to irrelevant terms.
 
-## Algorithms
+## Conceptual Process
+
+1) First step is to import these texts into one's favorite computing environment.
+
+2) Second step is tidying up the texts, including preprocessing the texts to obtain a convenient representation for later analysis. 
+This step might involve text reformatting (e.g., whitespace removal),stopword removal, or stemming procedures. 
+
+3) Third, the analyst must be able to transform the preprocessed texts into structured formats to be actually computed with. 
+For classical text mining tasks, this normally implies the creation of a so-called term-document matrix, probably the most common format to represent texts for computation. 
+
+4) Now the analyst can work and compute on texts with standard techniques from statistics and data mining, like clustering or classification methods.
+
 
 ## Transformations
 
@@ -88,6 +91,7 @@ Hence formally the filter function is just a predicate function. This way we can
 
 
 Transformations shipped with tm package in R:
+
 1) asPlain() Converts the document to a plain text document
 2) loadDoc() Triggers load on demand
 3) removeCitation() Removes citations from e-mails
@@ -102,22 +106,14 @@ Transformations shipped with tm package in R:
 12) tmTolower() Conversion to lower case letters
 
 
-## Preprocessing
+## Preprocessing Transformation
 
-Data import
-Since the documents are in XML format and we prefer to get rid of the XML tree and use the plain text. Instead we transform our collection with the predefined generic asPlain():
-R> tmMap(Reuters, asPlain)
-
-We then extract two subsets of the full Reuters-21578 data set by filtering out those with topics acq and crude. Since the Topics are stored in the LocalMetaData slot, by
-readReut21578XML() the filtering can be easily accomplished e.g., via
-R> tmFilter(crude, "Topics == 'crude'")
-
-Stemming
-Porter Stemming Algorithm
-Whitespace elimination and lower case conversion
-Stopword removal
-Synonyms
-Part of speech tagging
+1) Stemming
+2) Porter Stemming Algorithm
+3) Whitespace elimination and lower case conversion
+4) Stopword removal
+5) Synonyms
+6) Part of speech tagging
 
 
 ## Applications
@@ -159,13 +155,3 @@ Only 135 vocabulary items are needed to account for half the Brown Corpus.[4]
 The same relationship occurs in many other rankings unrelated to language, such as the population ranks of cities in various countries, corporation sizes, 
 income rankings, ranks of number of people watching the same TV channel, and so on. 
 The appearance of the distribution in rankings of cities by population was first noticed by Felix Auerbach in 1913.
-
-http://yulijia.net/en/howto/r-language/2011/08/06/how-to-calculate-word-frequencies-with-r.html
-
-https://stackoverflow.com/questions/18101047/list-of-word-frequencies-using-r
-
-
-
-Counting tokens and types
-
-frequency list : rank/frequency profiles and as frequency spectra
